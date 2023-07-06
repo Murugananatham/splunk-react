@@ -40,7 +40,7 @@ const data = [
 function App() {
 
   async function splunkSampleSearch() {
-    const response = await fetch("http://localhost:3001/splunk-sample-search");
+    const response = await fetch("http://localhost:3001/splunk-metrics-search");
     const results = await response.json();
     console.log("results --> ", results);
   }
