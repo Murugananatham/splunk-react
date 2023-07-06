@@ -9,32 +9,35 @@ function BarChart({ data, width, height }) {
             const margin = { top: 20, right: 30, bottom: 30, left: 40 };
             const x = d3
                 .scaleBand()
-                .domain(data.map((d) => d.year))
+                .domain(data.map((d) => d.date))
                 .rangeRound([margin.left, width - margin.right])
                 .padding(0.1);
 
             const y1 = d3
                 .scaleLinear()
-                .domain([0, d3.max(data, (d) => d.sales)])
+                .domain([0, d3.max(data, (d) => d.avgcpu)])
                 .rangeRound([height - margin.bottom, margin.top]);
 
             const xAxis = (g) =>
                 g.attr("transform", `translate(0,${height - margin.bottom})`).call(
                     d3
                         .axisBottom(x)
-                        .tickValues(
-                            d3
-                                .ticks(...d3.extent(x.domain()), width / 40)
-                                .filter((v) => x(v) !== undefined)
-                        )
+                        .tickFormat(d3.timeFormat("%Y-%m-%d"))
                         .tickSizeOuter(0)
+                ).call((g) =>
+                    g
+                        .append("text")
+                        .attr("transform", `translate(${width/2},40)`)
+                        .attr("fill", "currentColor")
+                        .attr("text-anchor", "start")
+                        .text("Time")
                 );
 
             const y1Axis = (g) =>
                 g
                     .attr("transform", `translate(${margin.left},0)`)
                     .style("color", "steelblue")
-                    .call(d3.axisLeft(y1).ticks(null, "s"))
+                    .call(d3.axisLeft(y1).ticks(null, "m"))
                     .call((g) => g.select(".domain").remove())
                     .call((g) =>
                         g
@@ -43,7 +46,7 @@ function BarChart({ data, width, height }) {
                             .attr("y", 10)
                             .attr("fill", "currentColor")
                             .attr("text-anchor", "start")
-                            .text(data.y1)
+                            .text("% of usage")
                     );
 
             svg.select(".x-axis").call(xAxis);
@@ -56,10 +59,10 @@ function BarChart({ data, width, height }) {
                 .data(data)
                 .join("rect")
                 .attr("class", "bar")
-                .attr("x", (d) => x(d.year))
+                .attr("x", (d) => x(d.date))
                 .attr("width", x.bandwidth())
-                .attr("y", (d) => y1(d.sales))
-                .attr("height", (d) => y1(0) - y1(d.sales));
+                .attr("y", (d) => y1(d.avgcpu))
+                .attr("height", (d) => y1(0) - y1(d.avgcpu));
 
         },
         [data.length]
